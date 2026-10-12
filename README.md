@@ -10,6 +10,7 @@ Code from the HCL Java training, pushed daily. One folder per module, one folder
 | 2 | OOP: constructors, inheritance, overloading and overriding, encapsulation, access modifiers | [day2](module-1-core-java-foundations/src/day2) |
 | 3 | Abstraction, interfaces, collections (LinkedList, ArrayList, Stack) | [day3](module-1-core-java-foundations/src/day3) |
 | 4 | Queue, Deque and Stack with ArrayDeque, HashMap, Comparable and toString (sorting Student objects) | [day4](module-1-core-java-foundations/src/day4) |
+| 5 | Wrapper classes and autoboxing, generics, Comparable vs Comparator, functional interfaces and lambda expressions | [day5](module-1-core-java-foundations/src/day5) · [notes](module-1-core-java-foundations/notes/day5-comparable-vs-comparator.md) |
 
 ## Layout
 
@@ -17,7 +18,7 @@ Code from the HCL Java training, pushed daily. One folder per module, one folder
 module-1-core-java-foundations/
 ├── notes/              theory notes (no code)
 └── src/
-    ├── day1/ … day4/   one folder (and package) per day
+    ├── day1/ … day5/   one folder (and package) per day
     │   └── <topic>/    one package per topic (constructors, inheritance, collections, …)
 ```
 
