@@ -1,81 +1,28 @@
-# Deployment of SpringBoot App
+# JWT demo with Docker Compose
 
-# Folder Structure
+Run these commands from this folder in PowerShell with Docker Desktop running Linux containers.
 
-- /backend/Dockerfile
-- /backend/.dockerignore
-- /frontend/Dockerfile
-- /frontend/.dockerignore
-- /frontend/nginx.conf
-- root/docker-compose.yml
-- root/.env
-- root/.gitignore
+For a fresh checkout, create an ignored `.env` file with unique local credentials. Keep the same file on subsequent starts, since MySQL sets its credentials when it first initializes the named volume.
 
-### /backend/Dockerfile
-
-```
-# ---------- Build State ---------
-FROM maven:3.9-eclipse-temurin-25
-WORKDIR /app
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-COPY src ./src
-RUN mvn clean package -DskipTests -B
-
-# ----- Run Stage ---------------
-FROM eclipse-temurin:25-jre
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT [ "java","-jar","app.jar" ]
-```
-
-### /backend/.dockerignore
-
-```
-target
-.git
-.idea
-*.iml
-```
-
-### frontend/Docekerfile
-
-```
-# ------- Build Stage -----
-FROM node:20-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# ---- Serve Stage -----
-FROM nginx:alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-
-```
-
-### frontend/nginx.conf
-
-```
-server{
-    listen 80;
-    root /usr/share/nginx/html;
-    index index.html
-    # React single-page app
-    location / {
-        try_files $url /index.html
-    }
-    # forward API Calls to the Springboot container
-    location /api/ {
-        proxy_pass http://backend:8080/api/v1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-
+```powershell
+if (-not (Test-Path .env)) {
+  @(
+    "JWTDEMO_DB_PASSWORD=$([guid]::NewGuid().ToString('N'))"
+    "JWTDEMO_DB_ROOT_PASSWORD=$([guid]::NewGuid().ToString('N'))"
+    "JWTDEMO_JWT_SECRET=$([guid]::NewGuid().ToString('N'))$([guid]::NewGuid().ToString('N'))"
+  ) | Set-Content .env -Encoding ascii
 }
+docker compose -p module3-jwtdemo up --build -d --wait
 ```
+
+Open [the demo](http://localhost:8088). Register a demo user, sign in, and create a post. Nginx forwards `/api/v1/` to Spring Boot inside Docker. MySQL is available at `127.0.0.1:3307` for local database clients and persists its data in a named volume.
+
+If a port is in use, set `JWTDEMO_HTTP_PORT` or `JWTDEMO_MYSQL_PORT` in `.env` before starting. The separate `docker-compose.dev.yml` is for running only MySQL while developing the backend on the host. Both configurations use port 3307 by default.
+
+```powershell
+docker compose -p module3-jwtdemo ps
+docker compose -p module3-jwtdemo logs backend
+docker compose -p module3-jwtdemo down
+```
+
+`down` stops the stack and keeps MySQL data.
